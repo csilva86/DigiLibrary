@@ -1,0 +1,29 @@
+<template>
+    <div class="slds-var-p-horizontal_medium slds-var-p-bottom_medium">
+        <lightning-card title="Books" icon-name="standard:record">
+            <template lwc:if={error}>
+                <div class="slds-var-p-horizontal_medium slds-text-color_error" role="alert">
+                    {error}
+                </div>
+            </template>
+
+            <template lwc:if={hasBooks}>
+                <div class="slds-var-p-horizontal_small slds-var-p-bottom_small">
+                    <lightning-datatable
+                        key-field="Id"
+                        data={books}
+                        columns={columns}
+                        hide-checkbox-column
+                        column-widths-mode="auto">
+                    </lightning-datatable>
+                </div>
+            </template>
+
+            <template lwc:if={showEmpty}>
+                <div class="slds-var-p-around_medium slds-text-color_weak">
+                    No books registered.
+                </div>
+            </template>
+        </lightning-card>
+    </div>
+</template>

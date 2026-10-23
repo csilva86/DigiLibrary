@@ -1,0 +1,109 @@
+<template>
+    <lightning-card title="Library - Search & Loan" icon-name="standard:record">
+        <div class="slds-var-p-horizontal_medium slds-var-p-bottom_medium">
+            <div class="slds-grid slds-gutters slds-wrap">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                    <lightning-record-picker
+                        label="Borrower"
+                        placeholder="Search contacts..."
+                        object-api-name="Contact"
+                        onchange={handleBorrowerChange}>
+                    </lightning-record-picker>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                    <div class="slds-grid slds-grid_vertical-align-end slds-gutters_x-small">
+                        <div class="slds-col">
+                            <lightning-input
+                                type="search"
+                                label="Search by title or author"
+                                placeholder="e.g. Tom Sawyer, Mark Twain..."
+                                value={term}
+                                onchange={handleTermChange}
+                                onkeyup={handleTermKeyUp}>
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-no-flex">
+                            <lightning-button
+                                label="Search"
+                                variant="brand"
+                                icon-name="utility:search"
+                                disabled={searchDisabled}
+                                onclick={handleSearch}>
+                            </lightning-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slds-is-relative slds-var-m-top_medium">
+                <template lwc:if={isLoading}>
+                    <lightning-spinner
+                        alternative-text="Searching books..."
+                        size="small">
+                    </lightning-spinner>
+                </template>
+
+                <template lwc:if={error}>
+                    <div class="slds-text-color_error slds-var-p-vertical_small" role="alert">
+                        {error}
+                    </div>
+                </template>
+
+                <!-- <template lwc:if={showPrompt}>
+                    <p class="slds-text-body_regular slds-text-color_weak slds-var-p-vertical_small">
+                        Enter a title or author and press Search.
+                    </p>
+                </template> -->
+
+                <template lwc:if={showEmptyState}>
+                    <p class="slds-text-body_regular slds-text-color_weak slds-var-p-vertical_small">
+                        No books found for your search.
+                    </p>
+                </template>
+
+                <template lwc:if={hasResults}>
+                    <ul class="slds-has-dividers_bottom-space">
+                        <template for:each={rows} for:item="row">
+                            <li key={row.key} class="slds-item slds-box slds-box_x-small slds-var-m-bottom_x-small">
+                                <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-wrap">
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_7-of-12">
+                                        <p class="slds-text-heading_small">{row.title}</p>
+                                        <p class="slds-text-body_small slds-text-color_weak">{row.author}</p>
+                                        <span class={row.badgeClass}>{row.copiesLabel}</span>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-text-align_right slds-var-m-top_x-small">
+                                        <template lwc:if={row.existsLocally}>
+                                            <c-library-loan-button
+                                                book-id={row.bookId}
+                                                book-title={row.title}
+                                                borrower-id={borrowerId}
+                                                onloancreated={handleLoanCreated}>
+                                            </c-library-loan-button>
+                                        </template>
+                                        <template lwc:else>
+                                            <lightning-button
+                                                label="Register / Import"
+                                                variant="neutral"
+                                                icon-name="utility:download"
+                                                data-title={row.title}
+                                                data-author={row.author}
+                                                disabled={row.importing}
+                                                onclick={handleImport}>
+                                            </lightning-button>
+                                            <template lwc:if={row.importing}>
+                                                <lightning-spinner
+                                                    alternative-text="Importing..."
+                                                    size="x-small">
+                                                </lightning-spinner>
+                                            </template>
+                                        </template>
+                                    </div>
+                                </div>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>

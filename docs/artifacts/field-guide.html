@@ -1,0 +1,928 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>DigiLibrary Field Guide</title>
+<meta name="description" content="A study companion for the DigiLibrary Apex Developer Challenge build: mental model, code walkthroughs, a design-decision log, a self-check quiz, and a persistent review checklist." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+/>
+
+<style>
+  :root {
+    --paper: #f6f7f9;
+    --ink: #1b2330;
+    --ink-soft: #59626f;
+    --ink-faint: #8b94a2;
+    --line: #c9cfd8;
+    --box: #ffffff;
+    --wash: #eef1f4;
+    --accent: #0e6e6b;
+    --accent-wash: #e4efee;
+    --good: #2f7d57;
+
+    --serif: "Spectral", Georgia, serif;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --bar-h: 52px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #12161b;
+      --ink: #e7ebf0;
+      --ink-soft: #9aa4b1;
+      --ink-faint: #626b78;
+      --line: #333c47;
+      --box: #1b212a;
+      --wash: #171c23;
+      --accent: #46b6b2;
+      --accent-wash: #14312f;
+      --good: #63bd8e;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #12161b;
+    --ink: #e7ebf0;
+    --ink-soft: #9aa4b1;
+    --ink-faint: #626b78;
+    --line: #333c47;
+    --box: #1b212a;
+    --wash: #171c23;
+    --accent: #46b6b2;
+    --accent-wash: #14312f;
+    --good: #63bd8e;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--accent);
+  }
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--accent-wash);
+    padding: 0.05em 0.35em;
+    border-radius: 3px;
+  }
+
+  /* ---------- sticky quick-nav ---------- */
+  .bar {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 5;
+    height: var(--bar-h);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0 1rem;
+    overflow-x: auto;
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 0.74rem;
+  }
+
+  .bar a {
+    flex: none;
+    padding: 0.35rem 0.65rem;
+    border-radius: 5px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .bar a:hover {
+    background: var(--wash);
+    color: var(--ink);
+  }
+
+  .bar .progress {
+    flex: none;
+    margin-left: auto;
+    padding-left: 1rem;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+  .bar .progress strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .wrap {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 0 clamp(1.1rem, 4vw, 1.75rem) 5rem;
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead {
+    padding-top: clamp(2rem, 6vw, 3rem);
+  }
+
+  .kicker {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.75rem;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(2rem, 6vw, 2.7rem);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.7rem;
+    text-wrap: balance;
+  }
+
+  .standfirst {
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    margin: 0 0 1.25rem;
+  }
+
+  .howto {
+    display: flex;
+    gap: 0.9rem;
+    padding: 0.9rem 1rem;
+    background: var(--wash);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    margin-bottom: 2.75rem;
+  }
+  .howto strong {
+    color: var(--ink);
+  }
+
+  /* ---------- sections ---------- */
+  section {
+    margin: 3.25rem 0;
+    scroll-margin-top: calc(var(--bar-h) + 14px);
+  }
+
+  section > h2 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.55rem;
+    margin: 0 0 0.3rem;
+  }
+
+  .section-kicker {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.4rem;
+  }
+
+  section > p {
+    margin: 0.9rem 0;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 1.6rem 0 0.6rem;
+  }
+
+  ul.plain,
+  ol.plain {
+    margin: 0.8rem 0;
+    padding-left: 1.25rem;
+  }
+  ul.plain li,
+  ol.plain li {
+    margin: 0.35rem 0;
+  }
+
+  dl.map {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.5rem 1.1rem;
+    margin: 1rem 0;
+    font-size: 0.94rem;
+  }
+  dl.map dt {
+    font-family: var(--mono);
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  dl.map dd {
+    margin: 0;
+    color: var(--ink-soft);
+  }
+
+  .pill-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 1rem 0 0;
+  }
+  .pill-links a {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .pill-links a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  pre {
+    margin: 1rem 0;
+    padding: 0.9rem 1rem;
+    background: var(--box);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    overflow-x: auto;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--ink);
+    white-space: pre;
+  }
+
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-wash);
+    padding: 0.85rem 1rem;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.92rem;
+    margin: 1.1rem 0;
+  }
+  .callout strong {
+    color: var(--accent);
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2rem;
+    padding: 0.9rem 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+  }
+  .facts span b {
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  table.decisions {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    margin: 1rem 0;
+  }
+  table.decisions th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 0 0.8rem 0.5rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  table.decisions td {
+    padding: 0.75rem 0.8rem 0.75rem 0;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    color: var(--ink-soft);
+  }
+  table.decisions td:first-child {
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  /* ---------- quiz ---------- */
+  details.q {
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 0.7rem 1rem;
+    margin: 0.6rem 0;
+    background: var(--box);
+  }
+  details.q summary {
+    cursor: pointer;
+    font-weight: 500;
+    list-style: none;
+    display: flex;
+    gap: 0.6rem;
+  }
+  details.q summary::-webkit-details-marker {
+    display: none;
+  }
+  details.q summary::before {
+    content: "+";
+    flex: none;
+    font-family: var(--mono);
+    color: var(--accent);
+    width: 1em;
+  }
+  details.q[open] summary::before {
+    content: "–";
+  }
+  details.q p {
+    margin: 0.75rem 0 0.15rem;
+    padding-top: 0.65rem;
+    border-top: 1px dashed var(--line);
+    color: var(--ink-soft);
+    font-size: 0.94rem;
+  }
+
+  /* ---------- checklist ---------- */
+  ul.checklist {
+    list-style: none;
+    margin: 0.8rem 0;
+    padding: 0;
+    display: grid;
+    gap: 0.55rem;
+  }
+  ul.checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+  }
+  ul.checklist input[type="checkbox"] {
+    flex: none;
+    width: 1.05rem;
+    height: 1.05rem;
+    margin-top: 0.2rem;
+    accent-color: var(--accent);
+  }
+  ul.checklist label {
+    font-size: 0.95rem;
+  }
+  ul.checklist input:checked + label {
+    color: var(--ink-faint);
+    text-decoration: line-through;
+    text-decoration-color: var(--line);
+  }
+
+  footer {
+    margin-top: 3.5rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    color: var(--ink-faint);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+  }
+</style>
+
+<nav class="bar" aria-label="Section navigation">
+  <a href="#map">Map</a>
+  <a href="#data">Data</a>
+  <a href="#trigger">Trigger</a>
+  <a href="#service">Service</a>
+  <a href="#components">Components</a>
+  <a href="#patterns">Patterns</a>
+  <a href="#testing">Testing</a>
+  <a href="#decisions">Decisions</a>
+  <a href="#quiz">Self-check</a>
+  <a href="#checklist">Checklist</a>
+  <span class="progress" aria-live="polite">
+    reviewed <strong id="progress-count">0</strong>/<span id="progress-total">0</span>
+  </span>
+</nav>
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="kicker">DigiLibrary · study companion</p>
+    <h1>DigiLibrary Field Guide</h1>
+    <p class="standfirst">
+      Everything to study the book-loan build in depth: how the pieces fit,
+      why each non-obvious decision was made, and two ways to check you
+      actually absorbed it.
+    </p>
+    <div class="howto">
+      <span>📎</span>
+      <span>
+        <strong>How to use this:</strong> read top to bottom once, then jump
+        around with the bar above. The <a href="#quiz">self-check</a> reveals
+        answers on click; the <a href="#checklist">checklist</a> remembers
+        what you've ticked, in this browser, next time you open the page.
+      </span>
+    </div>
+  </header>
+
+  <section id="map">
+    <span class="section-kicker">Orientation</span>
+    <h2>The shape of the system</h2>
+    <p>
+      A request crosses four participants: the <strong>LWC</strong> the user
+      operates, the <strong>Apex service layer</strong>
+      (<code>LibraryService</code>) it calls, the <strong>Open
+      Library API</strong> that service consults as a peer, and the
+      <strong>Salesforce data store</strong> with the trigger that keeps
+      inventory honest. No layer reaches past its neighbor — the LWC never
+      queries data directly, and the trigger never talks to a component.
+    </p>
+    <dl class="map">
+      <dt>Lightning Web Components</dt>
+      <dd><code>libraryBookSearch</code>, <code>libraryLoanButton</code>, <code>libraryBookList</code>, <code>libraryLoanList</code></dd>
+      <dt>Apex service layer</dt>
+      <dd><code>LibraryService</code>, <code>OpenLibraryService</code>, <code>LibraryListController</code></dd>
+      <dt>Trigger</dt>
+      <dd><code>LibraryBookLoanTrigger</code> → <code>LibraryBookLoanTriggerHandler</code></dd>
+      <dt>Data + metadata</dt>
+      <dd><code>Library_Book__c</code>, <code>Library_Book_Loan__c</code>, <code>LibraryRefresh__c</code>, <code>Open_Library</code></dd>
+    </dl>
+    <p class="pill-links">
+      <a href="https://claude.ai/code/artifact/59441dbe-dc15-461b-8b53-7757e39b36d8">↗ Full request-lifecycle swimlane</a>
+      <a href="https://claude.ai/code/artifact/1e5c3dd5-2865-4990-8aaa-6ce91967af4b">↗ Deliverables inventory</a>
+    </p>
+  </section>
+
+  <section id="data">
+    <span class="section-kicker">Layer 1</span>
+    <h2>Data model</h2>
+    <p>
+      Two custom objects carry the state; a message channel and a named
+      credential carry the plumbing.
+    </p>
+    <ul class="plain">
+      <li><code>Library_Book__c</code> — <code>Name</code> (the real, editable title), <code>Title__c</code> (a <em>formula</em> = <code>Name</code>), <code>Author__c</code>, <code>Available_Copies__c</code>, <code>Total_Copies__c</code>.</li>
+      <li><code>Library_Book_Loan__c</code> — <code>Borrower__c</code> (lookup Contact), <code>Book__c</code> (lookup Library_Book__c), <code>Loan_Start_Date__c</code>, <code>Loan_End_Date__c</code>.</li>
+      <li><code>LibraryRefresh__c</code> — a Lightning Message Channel, fields <code>source</code> and <code>bookId</code>; the sync mechanism between the four components (see <a href="#patterns">Patterns</a>).</li>
+      <li><code>Open_Library</code> — a legacy Named Credential, <code>Anonymous</code> principal, <code>NoAuthentication</code> protocol, pointed at <code>https://openlibrary.org</code>.</li>
+    </ul>
+    <div class="callout">
+      <strong>Why a formula field for the title?</strong> Every SOQL/SOSL query and the UI reference <code>Title__c</code> for readability and consistency with the challenge brief's field name — but there's nothing to write to on insert except the standard <code>Name</code> field, so <code>Title__c</code> just mirrors it.
+    </div>
+  </section>
+
+  <section id="trigger">
+    <span class="section-kicker">Layer 2</span>
+    <h2>Trigger &amp; handler</h2>
+    <p>
+      <code>LibraryBookLoanTrigger</code> runs on <code>after insert</code>
+      and <code>after delete</code> and does nothing but route to
+      <code>LibraryBookLoanTriggerHandler</code>. The handler is fully
+      bulkified: one aggregation, one <code>FOR UPDATE</code> SOQL, one DML —
+      no matter how many loans are in the batch.
+    </p>
+    <h3>The shared aggregator</h3>
+    <p>
+      <code>countLoansByBook</code> turns <code>Trigger.new</code> /
+      <code>Trigger.old</code> into a <code>Map&lt;Id, Integer&gt;</code> —
+      book Id to how many loans touch it in this batch. Three loans for the
+      same book become one entry with count 3, which is what lets both
+      handlers do their work in a single pass instead of once per record.
+    </p>
+    <h3>On insert: validate, then decide per book</h3>
+    <pre><code>if (book == null || available &lt; requested) {
+    unfulfillableBookIds.add(bookId);
+} else {
+    book.Available_Copies__c = available - requested;
+    booksToUpdate.add(book);
+}
+// ...for every loan whose book landed in unfulfillableBookIds:
+loan.addError(new NoAvailableCopiesException(
+    String.format(NO_COPIES_MESSAGE, new List&lt;Object&gt;{ bookName })
+));</code></pre>
+    <div class="callout">
+      <strong><code>addError</code>, not <code>throw</code>.</strong> A
+      <code>throw</code> would fail the whole transaction and, on the
+      standard record-creation page, surface a raw
+      <code>Class.X: line N</code> stack panel. <code>addError</code> blocks
+      only the offending <code>Library_Book_Loan__c</code> record — a bulk
+      insert still commits the loans for books that do have stock — and the
+      UI shows just the message.
+    </div>
+    <p>
+      <code>handleAfterDelete</code> is the mirror image: aggregate, query
+      <code>FOR UPDATE</code>, add the released count back to
+      <code>Available_Copies__c</code> (treating <code>null</code> as
+      <code>0</code>), one <code>update</code>.
+    </p>
+  </section>
+
+  <section id="service">
+    <span class="section-kicker">Layer 3</span>
+    <h2>Apex service layer</h2>
+    <p>
+      Three classes, one job each: <code>LibraryService</code> is what the
+      LWCs call; <code>OpenLibraryService</code> is the only class that ever
+      leaves the org; <code>LibraryListController</code> is a thin read-only
+      feed for the two list components.
+    </p>
+    <h3><code>searchBooks</code> — merge local + external</h3>
+    <pre><code>for (Library_Book__c book : findLocalBooks(searchTerm)) {
+    rows.add(new BookSearchResult(book));
+    localTitleKeys.add(normalizeTitle(book.Title__c));
+}
+List&lt;OpenLibraryService.ExternalBook&gt; externalBooks =
+    OpenLibraryService.search(searchTerm);
+Map&lt;String, Library_Book__c&gt; backfillByTitleKey =
+    booksByExactTitle(externalBooks, localTitleKeys);
+
+for (OpenLibraryService.ExternalBook external : externalBooks) {
+    String key = normalizeTitle(external.title);
+    if (localTitleKeys.contains(key)) { continue; }          // already local
+    if (backfillByTitleKey.containsKey(key)) {
+        rows.add(new BookSearchResult(backfillByTitleKey.get(key)));
+        continue;                                             // just imported
+    }
+    rows.add(new BookSearchResult(external.title, external.author));
+}</code></pre>
+    <p>
+      <code>booksByExactTitle</code> is a SOQL
+      <code>WHERE Name IN (...)</code> run only for external titles the SOSL
+      <code>FIND</code> didn't already return. It exists because SOSL's index
+      is near-real-time: a book imported seconds earlier can be briefly
+      invisible to <code>FIND</code>, and without this transactionally
+      consistent check it would reappear as an import candidate even though
+      it's already catalogued.
+    </p>
+    <h3>The rest of the class</h3>
+    <ul class="plain">
+      <li><code>importBook(title, author)</code> — de-dupes by <code>Name</code>, otherwise inserts a book with <code>Total_Copies__c</code> and <code>Available_Copies__c</code> both <code>1</code>.</li>
+      <li><code>loanBook(bookId, borrowerId)</code> — selects the book <code>FOR UPDATE</code>, throws <code>NoAvailableCopiesException</code> if copies aren't &gt; 0, otherwise inserts the loan.</li>
+      <li><code>requestLoan</code> — the <code>@AuraEnabled</code> wrapper; catches everything and rethrows as <code>AuraHandledException</code>, the only exception type whose message reaches the LWC.</li>
+    </ul>
+    <h3><code>OpenLibraryService.search</code> — never throws</h3>
+    <p>
+      A GET to <code>callout:Open_Library/search.json</code>, ten-second
+      timeout. A non-200 status, a <code>CalloutException</code>, or a JSON
+      shape that doesn't parse all just log a <code>WARN</code> and return an
+      empty list — an Open Library outage degrades
+      <code>searchBooks</code> to "local results only," it never breaks the
+      search.
+    </p>
+    <h3><code>LibraryListController</code></h3>
+    <p>
+      <code>getBooks()</code> and <code>getRecentLoans()</code> — both
+      <code>@AuraEnabled(cacheable=true)</code>, both a single
+      <code>LIMIT 200</code> query — feed <code>libraryBookList</code> and
+      <code>libraryLoanList</code> through <code>@wire</code>.
+    </p>
+  </section>
+
+  <section id="components">
+    <span class="section-kicker">Layer 4</span>
+    <h2>Lightning Web Components</h2>
+    <p>
+      All four live on the Home page of a custom <strong>DigiLibrary</strong>
+      app: <code>libraryBookSearch</code> on top,
+      <code>libraryLoanList</code> and <code>libraryBookList</code> side by
+      side below. <code>libraryLoanButton</code> isn't on the page directly —
+      it renders inside every search result row.
+    </p>
+    <h3><code>libraryBookSearch</code></h3>
+    <pre><code>handleTermChange(event) {
+    this.term = event.detail.value ?? '';   // typing never searches
+}
+handleSearch() {
+    this.submittedTerm = this.term.trim();  // only this does
+    this.runSearch();
+}</code></pre>
+    <p>
+      <code>term</code> (live input) and <code>submittedTerm</code> (what the
+      results represent) are split on purpose: <code>searchBooks</code>
+      performs a callout, so it can't be <code>@wire</code>d, and searching
+      on every keystroke would fire one Open Library request per letter.
+      Importing a book is optimistic — <code>markImported</code> flips the
+      row to "local" the instant <code>importBook</code> resolves, before
+      <code>runSearch()</code> reconciles with the server.
+    </p>
+    <h3><code>libraryLoanButton</code></h3>
+    <p>
+      One component, two placements. <code>effectiveBookId</code> falls back
+      from <code>bookId</code> to <code>recordId</code>;
+      <code>effectiveBorrowerId</code> falls back from a parent-supplied
+      <code>borrowerId</code> to an internally picked one.
+      <code>showBorrowerPicker</code> is true only when neither
+      <code>borrowerId</code> nor <code>bookId</code> was supplied — that is,
+      only in standalone, record-page use; embedded in a list it just waits
+      for the parent's <code>borrowerId</code>.
+    </p>
+    <h3><code>libraryBookList</code> &amp; <code>libraryLoanList</code></h3>
+    <p>
+      <code>libraryBookList</code> is a pure viewer: wire the data,
+      subscribe to <code>LibraryRefresh__c</code>, call
+      <code>refreshApex</code> on a message. <code>libraryLoanList</code>
+      does the same plus a per-row <strong>Delete</strong> action —
+      <code>LightningConfirm.open</code>, then <code>deleteRecord</code> from
+      <code>lightning/uiRecordApi</code> (no Apex at all), then a toast, a
+      <code>refreshApex</code>, and a <code>publish</code> so the other lists
+      pick up the copy the trigger just returned to the shelf.
+    </p>
+  </section>
+
+  <section id="patterns">
+    <span class="section-kicker">Cross-cutting</span>
+    <h2>Patterns that show up more than once</h2>
+    <h3>Lightning Message Service is the nervous system</h3>
+    <p>
+      <code>libraryBookSearch</code> and <code>libraryLoanList</code>
+      <strong>publish</strong> on <code>LibraryRefresh__c</code> after a
+      loan is created, imported, or deleted. All three list-facing
+      components — <code>libraryBookSearch</code>,
+      <code>libraryBookList</code>, <code>libraryLoanList</code> —
+      <strong>subscribe</strong> and just re-run their own query. No
+      component holds a reference to another.
+    </p>
+    <h3>One exception, two endings</h3>
+    <p>
+      <code>NoAvailableCopiesException</code> is thrown in exactly two
+      places — the trigger handler and <code>loanBook</code> — and each
+      wraps it differently for its audience: <code>addError</code> for the
+      standard-page path, <code>AuraHandledException</code> (via
+      <code>requestLoan</code>) for the LWC path. Same root cause, two UI
+      surfaces, two translations.
+    </p>
+    <h3>SOSL is eventually consistent; SOQL is the fallback</h3>
+    <p>
+      Anywhere a decision has to be correct <em>immediately</em> after a
+      write, SOQL backs up the SOSL index rather than trusting it alone —
+      that's the whole reason <code>booksByExactTitle</code> exists.
+    </p>
+    <h3>Bulkification, everywhere</h3>
+    <p>
+      The trigger handler is 1 SOQL + 1 DML per invocation regardless of
+      batch size; <code>searchBooks</code> and
+      <code>LibraryListController</code> are each exactly one query. No
+      query or DML statement in this codebase sits inside a loop.
+    </p>
+  </section>
+
+  <section id="testing">
+    <span class="section-kicker">Verification</span>
+    <h2>Testing patterns</h2>
+    <div class="facts">
+      <span>Apex <b>38</b> tests · <b>99%</b> org-wide</span>
+      <span>Jest <b>29</b> tests · <b>~94%</b> lines</span>
+    </div>
+    <h3>Apex</h3>
+    <ul class="plain">
+      <li><code>LibraryTestDataFactory</code> / <code>OpenLibraryCalloutMock</code> (<code>@IsTest</code>) build data and stub the HTTP callout with <code>ok</code> / <code>status</code> / <code>rawBody</code> / <code>failing</code> factories.</li>
+      <li><code>Test.setFixedSearchResults(...)</code> is required before any SOSL runs in a test — without it, <code>FIND</code> always returns empty.</li>
+      <li>Partial success under <code>addError</code> is proven with <code>Database.insert(loans, false)</code> and reading each <code>SaveResult</code>.</li>
+      <li>The one hard-to-reach branch — the trigger's <code>catch (DmlException)</code> fallback — is forced by inserting a title over 80 characters (<code>STRING_TOO_LONG</code>).</li>
+    </ul>
+    <h3>Jest</h3>
+    <pre><code>import LightningConfirm from 'lightning/confirm';
+// jest.mock('lightning/confirm', ...) is NOT picked up here —
+// overwrite the static directly instead:
+beforeEach(() => {
+    LightningConfirm.open = jest.fn().mockResolvedValue(true);
+});</code></pre>
+    <p>
+      The sfdx-lwc-jest stubs for <code>lightning/messageService</code> and
+      <code>lightning/uiRecordApi</code> already export
+      <code>subscribe</code>, <code>publish</code>, <code>deleteRecord</code>
+      etc. as real <code>jest.fn()</code>s — re-mocking them with a factory
+      is redundant, and for <code>lightning/confirm</code> it silently
+      doesn't take (the module's custom resolver doesn't honor an inline
+      factory the way <code>@salesforce/apex/*</code> imports do), which is
+      why that one gets reassigned instead. Apex wire adapters are stubbed
+      with <code>createApexTestWireAdapter</code> from
+      <code>@salesforce/sfdx-lwc-jest</code>.
+    </p>
+  </section>
+
+  <section id="decisions">
+    <span class="section-kicker">Defend these in a review</span>
+    <h2>Design-decision log</h2>
+    <table class="decisions">
+      <thead>
+        <tr><th>Decision</th><th>Because</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Trigger uses <code>addError</code>, not <code>throw</code></td><td>Clean message on the standard page; partial success in a bulk insert.</td></tr>
+        <tr><td>SOQL backfill in <code>searchBooks</code></td><td>SOSL's index lags a write by a few seconds; a fresh import must still read back as local.</td></tr>
+        <tr><td><code>searchBooks</code> is not <code>cacheable</code></td><td>It calls out to Open Library; cacheable Apex can't callout or DML.</td></tr>
+        <tr><td>Legacy anonymous Named Credential (not the new External Credential model)</td><td>Open Library needs no auth; the legacy form is the simplest thing that deploys clean for a public, anonymous GET.</td></tr>
+        <tr><td>Import defaults to 1 total / 1 available copy</td><td>The book must be immediately loanable — that's the point of importing it.</td></tr>
+        <tr><td>Optimistic UI update on import</td><td>The network round-trip shouldn't make a just-imported book look un-importable for a beat.</td></tr>
+        <tr><td>UI text and Apex exception strings both in English</td><td>Client requirement — and Apex messages surface straight into LWC toasts, so translating only the labels would leak Portuguese into an error toast.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="quiz">
+    <span class="section-kicker">Self-check</span>
+    <h2>Can you answer these without looking?</h2>
+    <p>Click a question to reveal the answer.</p>
+
+    <h3>Data &amp; trigger</h3>
+    <details class="q">
+      <summary>Why is <code>Library_Book__c.Title__c</code> a formula field instead of one you write to?</summary>
+      <p>The real editable title is the standard <code>Name</code> field; <code>Title__c</code> is a formula that mirrors it so SOQL/SOSL and the UI can use a field named after the challenge's spec, while inserts still target <code>Name</code>.</p>
+    </details>
+    <details class="q">
+      <summary>What does <code>countLoansByBook</code> do, and why do both trigger handlers call it?</summary>
+      <p>It aggregates <code>Trigger.new</code>/<code>Trigger.old</code> into a <code>Map&lt;bookId, count&gt;</code>, so N loans for the same book in one batch become one decrement or increment instead of N — it's the bulkification hinge for both directions.</p>
+    </details>
+    <details class="q">
+      <summary>Why <code>addError</code> instead of <code>throw</code> in the handler?</summary>
+      <p><code>throw</code> fails the whole transaction and shows a raw stack-trace panel on the standard page. <code>addError</code> blocks only the offending loan record, so a bulk insert still commits the loans for books that do have stock.</p>
+    </details>
+
+    <h3>Service layer</h3>
+    <details class="q">
+      <summary>Why can't <code>searchBooks</code> be <code>@AuraEnabled(cacheable=true)</code>?</summary>
+      <p>It performs an HTTP callout through <code>OpenLibraryService</code>, and cacheable Apex methods can't do callouts or DML — the LWC has to call it imperatively instead of through <code>@wire</code>.</p>
+    </details>
+    <details class="q">
+      <summary>What problem does <code>booksByExactTitle</code> solve?</summary>
+      <p>SOSL's search index is only near-real-time, so a book imported moments earlier can be briefly invisible to <code>FIND</code>. The transactional SOQL backfill catches those titles so they show as loanable instead of reappearing as import candidates.</p>
+    </details>
+    <details class="q">
+      <summary>Why does <code>BookSearchResult</code> have two constructors instead of static factories like <code>fromLocal()</code>?</summary>
+      <p>Apex inner classes can't declare <code>static</code> methods.</p>
+    </details>
+    <details class="q">
+      <summary>What's the difference between what <code>loanBook</code> throws and what <code>requestLoan</code> throws?</summary>
+      <p><code>loanBook</code> throws the real <code>NoAvailableCopiesException</code> for Apex callers and tests. <code>requestLoan</code> wraps every failure in an <code>AuraHandledException</code>, the only type whose message Salesforce actually forwards to the client.</p>
+    </details>
+
+    <h3>Components</h3>
+    <details class="q">
+      <summary>What do <code>effectiveBookId</code> and <code>effectiveBorrowerId</code> do in <code>libraryLoanButton</code>?</summary>
+      <p>They let one component serve two placements — a record page (falls back to <code>recordId</code>) and an embedded search row (uses the explicit values the parent passed) — without the rest of the component caring which context it's in.</p>
+    </details>
+    <details class="q">
+      <summary>When does <code>libraryLoanButton</code> render its own Contact picker?</summary>
+      <p>Only when there's no <code>borrowerId</code> <em>and</em> no <code>bookId</code> — standalone, record-page use. Embedded in a list the parent always passes <code>bookId</code>, so the picker stays hidden and the button just waits for a borrower.</p>
+    </details>
+    <details class="q">
+      <summary>Why does <code>libraryBookSearch</code> keep <code>term</code> and <code>submittedTerm</code> separate?</summary>
+      <p>So typing never triggers a search — only pressing Search or Enter copies <code>term</code> into <code>submittedTerm</code>. <code>searchBooks</code> calls out to Open Library, so searching per keystroke would fire one request per letter.</p>
+    </details>
+    <details class="q">
+      <summary>Who publishes and who subscribes on <code>LibraryRefresh__c</code>?</summary>
+      <p>Publishers: <code>libraryBookSearch</code> (after a loan or import) and <code>libraryLoanList</code> (after a delete). Subscribers: all three list-facing components, including <code>libraryBookSearch</code> itself — it both publishes and subscribes.</p>
+    </details>
+
+    <h3>Testing</h3>
+    <details class="q">
+      <summary>Why is <code>LightningConfirm.open</code> reassigned in tests instead of using <code>jest.mock('lightning/confirm', ...)</code>?</summary>
+      <p>The sfdx-lwc-jest stub ships <code>LightningConfirm</code> as a real class whose static <code>open()</code> throws by design, and its custom module resolver doesn't pick up an inline <code>jest.mock</code> factory for that path the way it does for <code>@salesforce/apex/*</code> imports — so the fix is to overwrite the static method directly on the imported class.</p>
+    </details>
+    <details class="q">
+      <summary>Why doesn't deleting a loan in <code>libraryLoanList</code> need any Apex?</summary>
+      <p><code>deleteRecord</code> from <code>lightning/uiRecordApi</code> performs the DML through the UI API directly; the <code>after delete</code> trigger fires exactly as it would for any other delete and increments <code>Available_Copies__c</code>.</p>
+    </details>
+  </section>
+
+  <section id="checklist">
+    <span class="section-kicker">Track your review</span>
+    <h2>Study checklist</h2>
+    <p>
+      Ticked items are remembered in this browser the next time you open this
+      page — nothing is sent anywhere.
+    </p>
+    <div class="checklist">
+      <h3>Data model</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="c1" /><label for="c1">Explain why <code>Title__c</code> can't be written to directly.</label></li>
+        <li><input type="checkbox" id="c2" /><label for="c2">Name all four DigiLibrary-specific metadata pieces from memory (2 objects, 1 channel, 1 named credential).</label></li>
+      </ul>
+      <h3>Trigger &amp; handler</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="c3" /><label for="c3">Walk through <code>handleAfterInsert</code> without opening the file.</label></li>
+        <li><input type="checkbox" id="c4" /><label for="c4">Explain what happens with 3 loans for the same book in one insert, one of them out of stock.</label></li>
+        <li><input type="checkbox" id="c5" /><label for="c5">Say why the trigger queries <code>FOR UPDATE</code>.</label></li>
+      </ul>
+      <h3>Service layer</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="c6" /><label for="c6">Explain the three-step merge inside <code>searchBooks</code>.</label></li>
+        <li><input type="checkbox" id="c7" /><label for="c7">Explain why <code>importBook</code> defaults to 1/1 copies and de-dupes by <code>Name</code>.</label></li>
+        <li><input type="checkbox" id="c8" /><label for="c8">Trace what happens end to end when <code>Available_Copies__c</code> is 0 and a user clicks Request loan.</label></li>
+        <li><input type="checkbox" id="c9" /><label for="c9">Explain why <code>OpenLibraryService.search</code> never throws.</label></li>
+      </ul>
+      <h3>Components</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="c10" /><label for="c10">Explain the <code>term</code> vs <code>submittedTerm</code> split without looking.</label></li>
+        <li><input type="checkbox" id="c11" /><label for="c11">Explain how <code>libraryLoanButton</code> decides whether to show its own borrower picker.</label></li>
+        <li><input type="checkbox" id="c12" /><label for="c12">Name every publisher and every subscriber of <code>LibraryRefresh__c</code>.</label></li>
+        <li><input type="checkbox" id="c13" /><label for="c13">Explain the optimistic update inside <code>handleImport</code>.</label></li>
+      </ul>
+      <h3>Cross-cutting</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="c14" /><label for="c14">Explain why <code>addError</code> beats <code>throw</code> in the trigger, and where the equivalent call was made in <code>LibraryService</code>.</label></li>
+        <li><input type="checkbox" id="c15" /><label for="c15">Explain the SOSL index-lag bug that shipped once, and its fix.</label></li>
+        <li><input type="checkbox" id="c16" /><label for="c16">Explain why <code>cacheable</code> and a callout are mutually exclusive in Apex.</label></li>
+      </ul>
+      <h3>Testing</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="c17" /><label for="c17">List the sfdx-lwc-jest stub modules that already export <code>jest.fn()</code> — don't re-mock them.</label></li>
+        <li><input type="checkbox" id="c18" /><label for="c18">Explain how a test simulates the trigger's <code>addError</code> firing inside a bulk insert.</label></li>
+      </ul>
+      <h3>Decisions</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="c19" /><label for="c19">Defend the legacy anonymous Named Credential over the newer External Credential model.</label></li>
+        <li><input type="checkbox" id="c20" /><label for="c20">Explain why the Apex exception strings had to be translated too, not just the LWC labels.</label></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span>DigiLibrary — StrongCRM Apex Developer Challenge</span>
+    <span><a href="https://claude.ai/code/artifact/59441dbe-dc15-461b-8b53-7757e39b36d8">Flow diagram</a></span>
+    <span><a href="https://claude.ai/code/artifact/1e5c3dd5-2865-4990-8aaa-6ce91967af4b">Deliverables inventory</a></span>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var KEY = "digilibrary-study-checklist-v1";
+    var boxes = Array.prototype.slice.call(
+      document.querySelectorAll('.checklist input[type="checkbox"]')
+    );
+    var countEl = document.getElementById("progress-count");
+    var totalEl = document.getElementById("progress-total");
+    if (totalEl) totalEl.textContent = String(boxes.length);
+
+    function load() {
+      try {
+        var raw = localStorage.getItem(KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    function save(ids) {
+      try {
+        localStorage.setItem(KEY, JSON.stringify(ids));
+      } catch (e) {
+        /* storage unavailable (private mode, etc.) - state just won't persist */
+      }
+    }
+    function render() {
+      var checked = boxes.filter(function (b) {
+        return b.checked;
+      }).length;
+      if (countEl) countEl.textContent = String(checked);
+    }
+
+    var done = load();
+    boxes.forEach(function (b) {
+      if (done.indexOf(b.id) !== -1) b.checked = true;
+      b.addEventListener("change", function () {
+        var ids = load();
+        var i = ids.indexOf(b.id);
+        if (b.checked && i === -1) ids.push(b.id);
+        if (!b.checked && i !== -1) ids.splice(i, 1);
+        save(ids);
+        render();
+      });
+    });
+    render();
+  })();
+</script>
+
+</body></html>

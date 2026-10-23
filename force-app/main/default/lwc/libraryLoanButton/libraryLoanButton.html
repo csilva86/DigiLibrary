@@ -1,0 +1,31 @@
+<template>
+    <div class="slds-grid slds-grid_vertical-align-end slds-gutters_x-small">
+        <template lwc:if={showBorrowerPicker}>
+            <div class="slds-col">
+                <lightning-record-picker
+                    label="Borrower"
+                    placeholder="Search contacts..."
+                    object-api-name="Contact"
+                    onchange={handleBorrowerChange}>
+                </lightning-record-picker>
+            </div>
+        </template>
+
+        <div class="slds-col slds-no-flex">
+            <lightning-button
+                label="Request loan"
+                variant="brand"
+                icon-name="utility:add"
+                disabled={buttonDisabled}
+                onclick={handleRequestLoan}>
+            </lightning-button>
+        </div>
+    </div>
+
+    <template lwc:if={loading}>
+        <lightning-spinner
+            alternative-text="Registering loan..."
+            size="small">
+        </lightning-spinner>
+    </template>
+</template>
